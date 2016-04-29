@@ -1,4 +1,4 @@
-#set -e
+set -e
 
 #1. make dirs
 mkdir -p data scripts results software
@@ -29,6 +29,18 @@ if [ ! -f ExAC.r0.3.1.sites.vep.vcf.gz ]; then
     wget ftp://ftp.broadinstitute.org/pub/ExAC_release/release0.3.1/ExAC.r0.3.1.sites.vep.vcf.gz.tbi
 fi
 
+mkdir -p pop_ids
+if [ ! -f pop_ids/AEN ]; then
+    cd pop_ids
+    wget https://gist.github.com/arundurvasula/62a1cd1884d0f3c8931e60a81546939c/raw/bb8c2be022ccd00e2b984bdcd9e0a96730c27cd9/AEN
+    wget https://gist.github.com/arundurvasula/62a1cd1884d0f3c8931e60a81546939c/raw/bb8c2be022ccd00e2b984bdcd9e0a96730c27cd9/CEM
+    wget https://gist.github.com/arundurvasula/62a1cd1884d0f3c8931e60a81546939c/raw/bb8c2be022ccd00e2b984bdcd9e0a96730c27cd9/CLB
+    wget https://gist.github.com/arundurvasula/62a1cd1884d0f3c8931e60a81546939c/raw/bb8c2be022ccd00e2b984bdcd9e0a96730c27cd9/HG
+    wget https://gist.github.com/arundurvasula/62a1cd1884d0f3c8931e60a81546939c/raw/bb8c2be022ccd00e2b984bdcd9e0a96730c27cd9/INC
+    wget https://gist.github.com/arundurvasula/62a1cd1884d0f3c8931e60a81546939c/raw/bb8c2be022ccd00e2b984bdcd9e0a96730c27cd9/STP
+    cd ..
+fi
+
 #4. convert data
 cd MathiesonEtAl_genotypes/
 if [ ! -f full230.csv ]; then
@@ -54,13 +66,13 @@ fi
 #5. done with prep
 
 echo "----"
-echo "vcf for ancient genomes created in data/MathiesonEtAl_genotypes/full230.vcf.gz"
-echo "ExAC data downloaded into data/ExAC.r0.3.1.sites.vep.vcf.gz"
+echo "--> VCF for ancient genomes created in data/MathiesonEtAl_genotypes/full230.vcf.gz"
+echo "--> ExAC data downloaded into data/ExAC.r0.3.1.sites.vep.vcf.gz"
 
 #6. prepare for some analyses
 
 echo "----"
-echo "Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF > 0.1"
+echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF > 0.1"
 
 cd ../../
 if [ ! -f data/ExAC.biallelic.missense.maf-0.1.vcf.gz ]; then
@@ -68,18 +80,22 @@ if [ ! -f data/ExAC.biallelic.missense.maf-0.1.vcf.gz ]; then
     bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -q 0.1 -i INFO/CSQ "~" "*missense_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-0.1.vcf.gz
 fi
 
-
 echo "----"
-echo "subsetting Mathieson genotypes for only missense mutations"
+echo "--> Subsetting Mathieson genotypes for only missense mutations"
 if [ ! -f data/MathiesonEtAl_genotypes/full230.biallelic.missense.vcf.gz ]; then
     bcftools query -f '%CHROM\t%POS\n' data/ExAC.biallelic.missense.maf-0.1.vcf.gz > data/ExAC.biallelic.missense.maf-0.1.sites.txt
     bcftools view data/MathiesonEtAl_genotypes/full230.vcf.gz -R data/ExAC.biallelic.missense.maf-0.1.sites.txt | bgzip -c > data/MathiesonEtAl_genotypes/full230.biallelic.missense.vcf.gz
 fi
 
 echo "----"
-echo "calculate allele frequencies for 6 ancient populations"
-for pop in `ls data/pop_ids/*`;
-do
-    p=`basename ${pop}`
-    vcftools --gzvcf data/MathiesonEtAl_genotypes/full230.biallelic.missense.vcf.gz --freq2 --out results/${p}.freqs --keep ${pop}
-done 
+echo "--> Calculating allele frequencies for 6 ancient populations"
+if [ ! -f results/AEN.freqs.frq ]; then
+    for pop in `ls data/pop_ids/*`;
+    do
+        p=`basename ${pop}`
+        vcftools --gzvcf data/MathiesonEtAl_genotypes/full230.biallelic.missense.vcf.gz --freq2 --out results/${p}.freqs --keep ${pop}
+    done 
+fi
+
+echo "----"
+echo "--> Done. Check out scripts/missense.Rmd to continue analysis"
