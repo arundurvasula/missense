@@ -1,0 +1,50 @@
+---
+title: "Missense Mutations"
+author: "Arun Durvasula"
+date: "April 29, 2016"
+output: html_document
+---
+
+```{r}
+library(data.table)
+setwd("~/missense/scripts")
+```
+
+```{r}
+AEN <- fread("../results/AEN.freqs.frq")
+names(AEN) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "MAJ_FREQ", "MIN_FREQ")
+AEN.med <- median(AEN$MIN_FREQ, na.rm=T)
+
+CEM <- fread("../results/CEM.freqs.frq")
+names(CEM) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "MAJ_FREQ", "MIN_FREQ")
+CEM.med <- median(CEM$MIN_FREQ, na.rm=T)
+
+CLB <- fread("../results/CLB.freqs.frq")
+names(CLB) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "MAJ_FREQ", "MIN_FREQ")
+CLB.med <- median(CLB$MIN_FREQ, na.rm=T)
+
+HG <- fread("../results/HG.freqs.frq")
+names(HG) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "MAJ_FREQ", "MIN_FREQ")
+HG.med <- median(HG$MIN_FREQ, na.rm=T)
+
+INC <- fread("../results/INC.freqs.frq")
+names(INC) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "MAJ_FREQ", "MIN_FREQ")
+INC.med <- median(INC$MIN_FREQ, na.rm=T)
+
+STP <- fread("../results/STP.freqs.frq")
+names(STP) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "MAJ_FREQ", "MIN_FREQ")
+STP.med <- median(STP$MIN_FREQ, na.rm=T)
+
+all <- data.frame(AEN$CHROM, AEN$POS, AEN$N_CHR, AEN$MIN_FREQ, HG$N_CHR, HG$MIN_FREQ, CEM$N_CHR, CEM$MIN_FREQ, INC$N_CHR, INC$MIN_FREQ, CLB$N_CHR, CLB$MIN_FREQ, STP$N_CHR, STP$MIN_FREQ)
+
+```
+
+
+Let's look at SLC45A2 (light skin mutation, rs16891982, 5: 33951693)
+The AEN, CEM, STP, and CLB "populations" have low Fst between them, so we can call them a continuous population. Maybe. ???
+```{r}
+ls <- c(AEN[AEN$POS==33951693]$MIN_FREQ, CEM[AEN$POS==33951693]$MIN_FREQ, STP[AEN$POS==33951693]$MIN_FREQ, CLB[AEN$POS==33951693]$MIN_FREQ, 0.9594)
+yrs <- c(-8400, -7700, -5400,-4900, 0)
+SLC45A2 <- data.frame(yrs, ls)
+plot(SLC45A2, type="b", ylab="DAF", xlab="Years")
+```
