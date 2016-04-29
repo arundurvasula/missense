@@ -31,7 +31,9 @@ fi
 
 #4. convert data
 cd MathiesonEtAl_genotypes/
-
+if [ ! -f full230.csv ]; then
+    wget https://gist.githubusercontent.com/arundurvasula/62a1cd1884d0f3c8931e60a81546939c/raw/e4372e99741dab8f82e281273e74cadd77cb9b41/full230.csv
+fi
 if [ ! -f full230.vcf.gz ]; then
     /usr/bin/python ../../scripts/data-munge/eigenstrat2vcf.py -r ./full230 | bgzip -c > ./full230.vcf.gz
 fi
