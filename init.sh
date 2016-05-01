@@ -69,19 +69,37 @@ echo "--> ExAC data downloaded into data/ExAC.r0.3.1.sites.vep.vcf.gz"
 
 #6. prepare for some analyses
 echo "----"
-echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF > 0.1"
+echo "--> Getting missense sites in the ExAC data"
 cd ../../
+if [ ! -f data/ExAC.missense.txt ]; then
+    awk '/missense_variant/ {print $1"\t"$2}' <(gunzip -c data/ExAC.r0.3.1.sites.vep.vcf.gz) > data/ExAC.missense.txt
+fi
+if [ ! -f data/ExAC.missense.vcf.gz ]; then
+    bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/ExAC.missense.txt -Oz > data/ExAC.missense.vcf.gz
+    bcftools index data/ExAC.missense.vcf.gz
+fi
+
+echo "--> Getting synonymous sites in the ExAC data"
+if [ ! -f data/ExAC.syn.txt ]; then
+    awk '/synonymous_variant/ {print $1"\t"$2}' <(gunzip -c data/ExAC.r0.3.1.sites.vep.vcf.gz) > data/ExAC.syn.txt
+fi
+if [ ! -f data/ExAC.synonymous.vcf.gz ]; then
+    bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/ExAC.syn.txt -Oz > data/ExAC.synonymous.vcf.gz
+    bcftools index data/ExAC.synonymous.vcf.gz
+fi
+
+echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF > 0.1"
 if [ ! -f data/ExAC.biallelic.missense.maf-0.1.vcf.gz ]; then
     bcftools query -f '%CHROM\t%POS\n' data/MathiesonEtAl_genotypes/full230.vcf.gz > data/MathiesonEtAl_genotypes/full230.sites.txt
-    bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -q 0.1 -i INFO/CSQ "~" "*missense_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-0.1.vcf.gz
+    bcftools view data/ExAC.missense.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -q 0.1 -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-0.1.vcf.gz
 fi
 echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF < 0.0001"
 if [ ! -f data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz ]; then
-    bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -Q 0.0001 -i INFO/CSQ "~" "*missense_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz
+    bcftools view data/ExAC.missense.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -Q 0.0001 -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz
 fi
 echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) synonymous mutations, 2) biallelic (don't care about frequency)"
 if [ ! -f data/ExAC.biallelic.synonymous.vcf.gz ]; then
-    bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -i INFO/CSQ "~" "*synonymous_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.synonymous.vcf.gz
+    bcftools view data/ExAC.synonymous.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.synonymous.vcf.gz
 fi
 
 echo "----"
