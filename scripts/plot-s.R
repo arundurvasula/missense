@@ -19,13 +19,11 @@ system("awk 'FNR==1 && NR!=1 { while (/^gen/) getline; } 1 {print}' results/sele
 c <- fread("results/selection/pooled-syn.param")
 
 ## Plot it
-image(kde2d(a$alpha1/(2*3500), a$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for common missense mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
-image(kde2d(b$alpha1/(2*3500), b$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for rare missense mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
-image(kde2d(c$alpha1/(2*3500), c$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for synonymous mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
-plot(density(a$age*2*3500), col="orange", main="Age distribution of common missense mutations", xlab="Allele age (years)")
-plot(density(b$age*2*3500), col="orange", main="Age distribution of rare missense mutations", xlab="Allele age (years)")
-plot(density(c$age*2*3500), col="orange", main="Age distribution of synonymous mutations", xlab="Allele age (years)")
-
-
-
-
+pdf("./selection-age.pdf",width=8.5,height=11)
+image(kde2d(b$alpha1/(2*3500), b$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for\nrare missense mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
+image(kde2d(a$alpha1/(2*3500), a$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for\ncommon missense mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
+image(kde2d(c$alpha1/(2*3500), c$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for\nsynonymous mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
+plot(density(b$age*2*3500), col="orange", main="Age distribution of\nrare missense mutations", xlab="Allele age (years)")
+plot(density(a$age*2*3500), col="orange", main="Age distribution of\ncommon missense mutations", xlab="Allele age (years)")
+plot(density(c$age*2*3500), col="orange", main="Age distribution of\nsynonymous mutations", xlab="Allele age (years)")
+dev.off()
