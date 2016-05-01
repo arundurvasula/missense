@@ -80,7 +80,7 @@ if [ ! -f data/ExAC.biallelic.missense.maf-0.1.vcf.gz ]; then
 fi
 echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF < 0.1"
 if [ ! -f data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz ]; then
-    bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -Q 0.1 -i INFO/CSQ "~" "*missense_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz
+    bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -Q 0.0001 -i INFO/CSQ "~" "*missense_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz
 fi
 echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) synonymous mutations, 2) biallelic (don't care about frequency)"
 if [ ! -f data/ExAC.biallelic.synonymous.vcf.gz ]; then
@@ -187,18 +187,18 @@ if [ ! -f data/syn.sites.txt ]; then
 fi
 echo "--> Estimating allele frequency trajectories for MAF > 0.1"
 # time is based on Ne = 3500, y=8400,7700,5400,4900,0. g=y/2N
-if [ ! -f results/selection/maf-0.1.params ]; then
+if [ ! -f results/selection/maf-0.1-1-914852.param ]; then
     while read der <&3 && read nchr <&4 && read sites <&5; do
 	
 	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-0.1-${sites}
     done 3< results/derived-maf-0.1.csv 4< results/nchr-maf-0.1.csv 5< data/maf-0.1.sites.txt
 fi
-if [ ! -f results/selection/maf-lt-0.1.params ]; then
+if [ ! -f results/selection/maf-lt-0.1-1-1222519.param ]; then
     while read der <&3 && read nchr <&4 && read sites <&5; do
         software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-lt-0.1-${sites}
     done 3< results/derived-maf-lt-0.1.csv 4< results/nchr-maf-lt-0.1.csv 5< data/maf-lt-0.1.sites.txt
 fi
-if [ ! -f results/selection/syn.params ]; then
+if [ ! -f results/selection/syn-1-1254255.param ]; then
     while read der <&3 && read nchr <&4; do
         software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/syn-${sites}
     done 3< results/derived-syn.csv 4< results/nchr-syn.csv 5< data/syn.sites.txt
