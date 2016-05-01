@@ -190,6 +190,8 @@ if [ ! -f results/selection/maf-0.1-1-914852.param ]; then
             continue
         fi
        	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-0.1-${sites}
+	rm results/selection/maf-0.1-${sites}.time
+	rm results/selection/maf-0.1-${sites}.traj
     done 3< results/derived-maf-0.1.csv 4< results/nchr-maf-0.1.csv 5< data/maf-0.1.sites.txt
 fi
 echo "--> Estimating allele frequency trajectories for MAF < 0.0001"
@@ -199,6 +201,8 @@ if [ ! -f results/selection/maf-lt-0.1-1-2489248.param ]; then
 	    continue
 	fi
 	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-lt-0.1-${sites}
+	rm results/selection/maf-lt-0.1-${sites}.time
+	rm results/selection/maf-lt-0.1-${sites}.traj
     done 3< results/derived-maf-lt-0.1.csv 4< results/nchr-maf-lt-0.1.csv 5< data/maf-lt-0.1.sites.txt
 fi
 echo "--> Estimating allele frequency trajectories for synonymous mutations"
@@ -208,6 +212,8 @@ if [ ! -f results/selection/syn-1-914852.param ]; then
             continue
         fi
 	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/syn-${sites}
+	rm results/selection/syn-${sites}.time
+	rm results/selection/syn-${sites}.traj
     done 3< results/derived-syn.csv 4< results/nchr-syn.csv 5< data/syn.sites.txt
 fi
 
