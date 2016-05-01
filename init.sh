@@ -190,16 +190,16 @@ echo "--> Estimating allele frequency trajectories for MAF > 0.1"
 if [ ! -f results/selection/maf-0.1.params ]; then
     while read der <&3 && read nchr <&4 && read sites <&5; do
 	
-	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 500000 -f 2000 -s 200 -P software/selection/constant.pop -a -o results/selection/maf-0.1-${sites}
+	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-0.1-${sites}
     done 3< results/derived-maf-0.1.csv 4< results/nchr-maf-0.1.csv 5< data/maf-0.1.sites.txt
 fi
 if [ ! -f results/selection/maf-lt-0.1.params ]; then
     while read der <&3 && read nchr <&4 && read sites <&5; do
-        software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 500000 -f 2000 -s 200 -P software/selection/constant.pop -a -o results/selection/maf-lt-0.1-${sites}
+        software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-lt-0.1-${sites}
     done 3< results/derived-maf-lt-0.1.csv 4< results/nchr-maf-lt-0.1.csv 5< data/maf-lt-0.1.sites.txt
 fi
 if [ ! -f results/selection/syn.params ]; then
     while read der <&3 && read nchr <&4; do
-        software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 500000 -f 2000 -s 200 -P software/selection/constant.pop -a -o results/selection/syn-${sites}
+        software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/syn-${sites}
     done 3< results/derived-syn.csv 4< results/nchr-syn.csv 5< data/syn.sites.txt
 fi
