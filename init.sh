@@ -63,22 +63,19 @@ if [ ! -f sr ]; then
 fi
 
 #5. done with prep
-
 echo "----"
 echo "--> VCF for ancient genomes created in data/MathiesonEtAl_genotypes/full230.vcf.gz"
 echo "--> ExAC data downloaded into data/ExAC.r0.3.1.sites.vep.vcf.gz"
 
 #6. prepare for some analyses
-
 echo "----"
 echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF > 0.1"
-
 cd ../../
 if [ ! -f data/ExAC.biallelic.missense.maf-0.1.vcf.gz ]; then
     bcftools query -f '%CHROM\t%POS\n' data/MathiesonEtAl_genotypes/full230.vcf.gz > data/MathiesonEtAl_genotypes/full230.sites.txt
     bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -q 0.1 -i INFO/CSQ "~" "*missense_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-0.1.vcf.gz
 fi
-echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF < 0.1"
+echo "--> Subsetting ExAC data for only SNPs in full 230 that are also 1) missense mutations, 2) biallelic, 3) MAF < 0.0001"
 if [ ! -f data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz ]; then
     bcftools view data/ExAC.r0.3.1.sites.vep.vcf.gz -R data/MathiesonEtAl_genotypes/full230.sites.txt -Q 0.0001 -i INFO/CSQ "~" "*missense_variant*" -m2 -M2 -v snps| bgzip -c > data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz
 fi
@@ -93,7 +90,7 @@ if [ ! -f data/MathiesonEtAl_genotypes/full230.biallelic.missense.maf-0.1.vcf.gz
     bcftools query -f '%CHROM\t%POS\n' data/ExAC.biallelic.missense.maf-0.1.vcf.gz > data/ExAC.biallelic.missense.maf-0.1.sites.txt
     bcftools view data/MathiesonEtAl_genotypes/full230.vcf.gz -R data/ExAC.biallelic.missense.maf-0.1.sites.txt | bgzip -c > data/MathiesonEtAl_genotypes/full230.biallelic.missense.maf-0.1.vcf.gz
 fi
-echo "--> Subsetting Mathieson genotypes for only missense mutations and MAF < 0.1"
+echo "--> Subsetting Mathieson genotypes for only missense mutations and MAF < 0.0001"
 if [ ! -f data/MathiesonEtAl_genotypes/full230.biallelic.missense.maf-lt-0.1.vcf.gz ]; then
     bcftools query -f '%CHROM\t%POS\n' data/ExAC.biallelic.missense.maf-lt-0.1.vcf.gz > data/ExAC.biallelic.missense.maf-lt-0.1.sites.txt
     bcftools view data/MathiesonEtAl_genotypes/full230.vcf.gz -R data/ExAC.biallelic.missense.maf-lt-0.1.sites.txt | bgzip -c > data/MathiesonEtAl_genotypes/full230.biallelic.missense.maf-lt-0.1.vcf.gz
@@ -113,7 +110,7 @@ if [ ! -f results/AEN-maf-0.1.frq ]; then
         vcftools --gzvcf data/MathiesonEtAl_genotypes/full230.biallelic.missense.maf-0.1.vcf.gz --freq2 --out results/${p}-maf-0.1 --keep ${pop}
     done 
 fi
-echo "--> Calculating allele frequencies for 6 ancient populations (MAF < 0.1)"
+echo "--> Calculating allele frequencies for 6 ancient populations (MAF < 0.0001)"
 if [ ! -f results/AEN-maf-lt-0.1.frq ]; then
     for pop in `ls data/pop_ids/*`;
     do
@@ -189,16 +186,30 @@ echo "--> Estimating allele frequency trajectories for MAF > 0.1"
 # time is based on Ne = 3500, y=8400,7700,5400,4900,0. g=y/2N
 if [ ! -f results/selection/maf-0.1-1-914852.param ]; then
     while read der <&3 && read nchr <&4 && read sites <&5; do
+	if [[ ${der} == "0,0,0,0,0" ]]; then
+            continue
+        fi
        	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-0.1-${sites}
     done 3< results/derived-maf-0.1.csv 4< results/nchr-maf-0.1.csv 5< data/maf-0.1.sites.txt
 fi
-if [ ! -f results/selection/maf-lt-0.1-1-1222519.param ]; then
+echo "--> Estimating allele frequency trajectories for MAF < 0.0001"
+if [ ! -f results/selection/maf-lt-0.1-1-2489248.param ]; then
     while read der <&3 && read nchr <&4 && read sites <&5; do
-        software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-lt-0.1-${sites}
+        if [[ ${der} == "0,0,0,0,0" ]]; then
+	    continue
+	fi
+	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/maf-lt-0.1-${sites}
     done 3< results/derived-maf-lt-0.1.csv 4< results/nchr-maf-lt-0.1.csv 5< data/maf-lt-0.1.sites.txt
 fi
+echo "--> Estimating allele frequency trajectories for synonymous mutations"
 if [ ! -f results/selection/syn-1-914852.param ]; then
     while read der <&3 && read nchr <&4 && read sites <&5; do
-        software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/syn-${sites}
+        if [[ ${der} == "0,0,0,0,0" ]]; then
+            continue
+        fi
+	software/selection/sr -X ${der} -N ${nchr} -T -1.2,-1.1,-0.77,-0.7,0 -n 100000 -f 2000 -s 100 -P software/selection/constant.pop -a -o results/selection/syn-${sites}
     done 3< results/derived-syn.csv 4< results/nchr-syn.csv 5< data/syn.sites.txt
 fi
+
+echo "--> Plotting allele ages and selection coefficients."
+Rscript scripts/plot-s.R

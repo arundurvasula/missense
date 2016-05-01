@@ -4,8 +4,6 @@ library(RColorBrewer)
 rf <- colorRampPalette(rev(brewer.pal(11,'Spectral')))
 r <- rf(32)
 
-par(mfrow=c(2,3))
-
 ## MAF > 0.1
 system("awk 'FNR==1 && NR!=1 { while (/^gen/) getline; } 1 {print}' results/selection/maf-0.1*.param > results/selection/pooled-maf-0.1.param")
 a <- fread("results/selection/pooled-maf-0.1.param")
@@ -19,7 +17,8 @@ system("awk 'FNR==1 && NR!=1 { while (/^gen/) getline; } 1 {print}' results/sele
 c <- fread("results/selection/pooled-syn.param")
 
 ## Plot it
-pdf("./selection-age.pdf",width=8.5,height=11)
+png("./selection-age.png",width=11,height=8.5, units="in", res=300)
+par(mfrow=c(2,3))
 image(kde2d(b$alpha1/(2*3500), b$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for\nrare missense mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
 image(kde2d(a$alpha1/(2*3500), a$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for\ncommon missense mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
 image(kde2d(c$alpha1/(2*3500), c$alpha2/(2*3500), n=200), col=r, main="Selection coefficients for\nsynonymous mutations", xlab=expression("s"[2]), ylab=expression("s"[1]))
